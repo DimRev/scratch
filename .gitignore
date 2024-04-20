@@ -1,3 +1,4 @@
 rss-agg
 .vscode/
 .env
+vendor/
