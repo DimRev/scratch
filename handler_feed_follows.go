@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/dimrev/rss-agg/internal/database"
+	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 )
 
@@ -46,4 +47,24 @@ func (apiCfg *apiConfig) handlerGetFeedFollows(w http.ResponseWriter, r *http.Re
 	}
 
 	responseWithJSON(w, 200, databaseFeedFollowsToFeedFollows(feedFollows))
+}
+
+func (apiCfg *apiConfig) handlerDeleteFeedFollow(w http.ResponseWriter, r *http.Request, user database.User) {
+	feedFollowIdStr := chi.URLParam(r, "feedFollowId")
+	feedFollowId, err := uuid.Parse(feedFollowIdStr)
+	if err != nil {
+		respondWithError(w, 400, fmt.Sprintf("error parsing feed follow id: %v", err))
+		return
+	}
+
+	err = apiCfg.DB.DeleteFeedFollows(r.Context(), database.DeleteFeedFollowsParams{
+		ID:     feedFollowId,
+		UserID: user.ID,
+	})
+	if err != nil {
+		respondWithError(w, 400, fmt.Sprintf("error deleting feed follow: %v", err))
+		return
+	}
+
+	responseWithJSON(w, 200, struct{}{})
 }
