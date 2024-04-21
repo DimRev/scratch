@@ -23,12 +23,16 @@ func (apiCfg *apiConfig) handlerCreateUser(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	apiCfg.DB.CreateUser(r.Context(), database.CreateUserParams{
+	user, err := apiCfg.DB.CreateUser(r.Context(), database.CreateUserParams{
 		ID:        uuid.New(),
 		CreatedAt: time.Now().UTC(),
 		UpdatedAt: time.Now().UTC(),
 		Name:      params.Name,
 	})
+	if err != nil {
+		respondWithError(w, 400, fmt.Sprint("error creating user: ", err))
+		return
+	}
 
-	responseWithJSON(w, 200, struct{}{})
+	responseWithJSON(w, 200, databaseUserToUser(user))
 }
