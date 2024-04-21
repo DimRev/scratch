@@ -5,6 +5,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/dimrev/rss-agg/internal/database"
 	"github.com/go-chi/chi/v5"
@@ -47,9 +48,12 @@ func main() {
 		MaxAge:           300,
 	}))
 
+	db := database.New(conn)
 	apiCfg := apiConfig{
-		DB: database.New(conn),
+		DB: db,
 	}
+
+	go startScraping(db, 10, time.Minute)
 
 	v1Router := chi.NewRouter()
 	// TESTING
